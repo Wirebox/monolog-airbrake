@@ -1,0 +1,7 @@
+<phpunit colors="false" verbose="false">
+   <testsuites>
+     <testsuite name="Monolog Airbrake Tests">
+       <directory>tests</directory>
+     </testsuite>
+   </testsuites>
+</phpunit>
