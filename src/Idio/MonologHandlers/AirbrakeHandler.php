@@ -55,7 +55,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
             $this->createAirbrakeNotice(
                 array(
                     'errorClass'   => $record['level_name'],
-                    'errorMessage' => $record['message'],
+                    'errorMessage' => $this->makeXmlSafe($record['message']),
                     'extraParameters' => array_merge(
                         $record['extra'],
                         array(
@@ -66,6 +66,17 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
                 )
             )
         );
+    }
+
+    /**
+     * Make XML Safe
+     *
+     * @param string $strMessage Message
+     * @return string Message with & replaced with &amp;
+     */
+    protected function makeXmlSafe($strMessage)
+    {
+        return str_replace('&', '&amp;', $strMessage);
     }
 
     /**
