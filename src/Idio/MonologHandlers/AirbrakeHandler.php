@@ -56,6 +56,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
                 array(
                     'errorClass'   => $record['level_name'],
                     'errorMessage' => $this->makeXmlSafe($record['message']),
+                    'backtrace'    => debug_backtrace(),
                     'extraParameters' => array_merge(
                         $record['extra'],
                         array(

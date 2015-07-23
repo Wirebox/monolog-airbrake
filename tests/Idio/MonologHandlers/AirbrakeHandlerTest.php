@@ -62,14 +62,9 @@ class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
         $this->handler->expects($this->once())
                       ->method('createAirbrakeNotice')
                       ->with(
-                          array(
-                             'errorClass' => 'ERROR',
-                             'errorMessage' => 'log',
-                             'extraParameters' => array(
-                                 'channel' => 'meh',
-                                 'context' => array()
-                             )
-                         )
+                          $this->callback(function($notice){
+                              return $this->validateNotice($notice);
+                          })
                       )
                       ->will($this->returnValue(new \Airbrake\Notice(array())));
 
@@ -99,15 +94,9 @@ class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
         $this->handler->expects($this->once())
                       ->method('createAirbrakeNotice')
                       ->with(
-                          array(
-                             'errorClass' => 'ERROR',
-                             'errorMessage' => 'log',
-                             'extraParameters' => array(
-                                 'channel' => 'meh',
-                                 'context' => array('yummy' => 'beans'),
-                                 'beans' => 'yummy'
-                             )
-                          )
+                          $this->callback(function($notice){
+                              return $this->validateNotice($notice);
+                          })
                       )
                       ->will($this->returnValue(new \Airbrake\Notice(array())));
 
@@ -147,5 +136,31 @@ class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
                 'message' => 'log',
             )
         );
+    }
+
+    public function validateNotice($notice)
+    {
+        if (!isset($notice['errorClass']) || $notice['errorClass'] !== 'ERROR') {
+            return false;
+        }
+
+        if (!isset($notice['errorMessage']) || $notice['errorMessage'] !== 'log') {
+            return false;
+        }
+
+        if (!isset($notice['backtrace'])) {
+            return false;
+        }
+
+        $extraParams = array(
+            'channel' => 'meh',
+            'context' => array()
+        );
+
+        if (!isset($notice['extraParameters'])) {
+            return false;
+        }
+
+        return true;
     }
 }
