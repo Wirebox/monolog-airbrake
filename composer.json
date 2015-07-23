@@ -1,5 +1,5 @@
 {
-    "name": "idio/monolog-airbrake",
+    "name": "wirebox/monolog-airbrake",
     "description": "Airbrake Handler for Monolog",
     "keywords": ["log", "logging", "psr-3", "monolog", "airbrake"],
     "homepage": "http://github.com/idio/monolog-airbrake",
