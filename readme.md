@@ -4,8 +4,14 @@ Add the following to your composer.json and run `composer update`
 
 ```json
 {
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/Wirebox/monolog-airbrake"
+        }
+    ],
     "require": {
-        "idio/monolog-airbrake": "dev-master"
+        "wirebox/monolog-airbrake": "dev-master"
     }
 }
 ```
