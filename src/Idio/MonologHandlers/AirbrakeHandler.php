@@ -1,6 +1,7 @@
 <?php
 namespace Idio\MonologHandlers;
 
+use Airbrake\Client;
 use Monolog\Logger;
 
 /**
@@ -57,12 +58,10 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
                     'errorClass'   => $record['level_name'],
                     'errorMessage' => $this->makeXmlSafe($record['message']),
                     'backtrace'    => debug_backtrace(),
-                    'extraParameters' => array_merge(
-                        $record['extra'],
-                        array(
+                    'extraParameters' => array(
+                            'extra'   => $record['extra'], 
                             'context' => $record['context'],
                             'channel' => $record['channel']
-                        )
                     ),
                 )
             )
@@ -104,6 +103,17 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
         return new \Airbrake\Client(
             new \Airbrake\Configuration($this->strAirbrakeApiToken, $this->arrAirbrakeConfig)
         );
+    }
+
+    /**
+     * Set Airbrake Client
+     * 
+     * @param \Airbrake\Client $client
+     * @return void
+     */
+    public function setAirbrakeClient(Client $client)
+    {
+        $this->objAirbrakeClient = $client;
     }
 
     /**

@@ -10,25 +10,19 @@
 namespace Idio\MonologHandlers;
 
 use Monolog\Logger;
+use Idio\Mocks\AirbrakeClientMock;
 
-include_once('vendor/autoload.php');
-
-/**
- * @author Rafael Dohms <rafael@doh.ms>
- * @see    https://www.hipchat.com/docs/api
- */
 class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @var AirbrakeClientMock
+     */
+    protected $client;
 
     /**
-     * @var object Partially mocked handler
+     * @var AirbrakeHandler
      */
     protected $handler;
-
-    /**
-     * @var object Mocked Airbrake Client
-     */
-    protected $airbrake;
 
     /**
      * Set Up
@@ -36,131 +30,41 @@ class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
      * Create a partially mocked handler so that we can 'expect' our calls to
      * Airbrake
      */
-    protected function setUp()
+    protected function setup()
     {
-        $this->airbrake = $this->getMockBuilder('\Airbrake\Client')
-                               ->disableOriginalConstructor()
-                               ->getMock();
-
-        $this->handler = $this->getMockBuilder('\Idio\MonologHandlers\AirbrakeHandler')
-                              ->disableOriginalConstructor()
-                              ->setMethods(array('getAirbrakeClient', 'createAirbrakeNotice'))
-                              ->getMock();
-
-        $this->handler->expects($this->any())
-                      ->method('getAirbrakeClient')
-                      ->will($this->returnValue($this->airbrake));
-
-        $this->handler->__construct('test', array());
+        $this->handler = new AirbrakeHandler('test', array());
+        $this->client = new AirbrakeClientMock();
+        $this->handler->setAirbrakeClient($this->client);
     }
 
     /**
-     * Test that a notice gets sent when an entry needs logging
+     * Test the handler adapts a monolog record into an airbrake notice
      */
-    public function testNoticeGetsSent()
+    public function testReturnsNoticeWhenHandlerHandlesRecord()
     {
-        $this->handler->expects($this->once())
-                      ->method('createAirbrakeNotice')
-                      ->with(
-                          $this->callback(function($notice){
-                              return $this->validateNotice($notice);
-                          })
-                      )
-                      ->will($this->returnValue(new \Airbrake\Notice(array())));
-
-        $this->airbrake->expects($this->once())
-                       ->method('notify')
-                       ->with($this->isInstanceOf('\Airbrake\Notice'));
-
-        $this->handler->handle(
-            array(
-                'level' => Logger::ERROR,
-                'level_name' => 'ERROR',
-                'channel' => 'meh',
-                'context' => array(),
-                'datetime' => new \DateTime("@0"),
-                'extra' => array(),
-                'message' => 'log',
-            )
-        );
-    }
-
-    /**
-     * Test that extra details are included in the notice which is sent to
-     * Airbrake
-     */
-    public function testNoticeExtraDetails()
-    {
-        $this->handler->expects($this->once())
-                      ->method('createAirbrakeNotice')
-                      ->with(
-                          $this->callback(function($notice){
-                              return $this->validateNotice($notice);
-                          })
-                      )
-                      ->will($this->returnValue(new \Airbrake\Notice(array())));
-
-        $this->airbrake->expects($this->once())
-                       ->method('notify')
-                       ->with($this->isInstanceOf('\Airbrake\Notice'));
-
-        $this->handler->handle(
-            array(
-                'level' => Logger::ERROR,
-                'level_name' => 'ERROR',
-                'channel' => 'meh',
-                'context' => array('yummy' => 'beans'),
-                'datetime' => new \DateTime("@0"),
-                'extra' => array('beans' => 'yummy'),
-                'message' => 'log',
-            )
-        );
-    }
-
-    /**
-     * Test that no notice is sent if the error level is below the threshold
-     */
-    public function testNoticeBelowThresholdIsNotSent()
-    {
-        $this->airbrake->expects($this->never())
-                       ->method('notify');
-
-        $this->handler->handle(
-            array(
-                'level' => Logger::DEBUG,
-                'level_name' => 'DEBUG',
-                'channel' => 'meh',
-                'context' => array('from' => 'logger'),
-                'datetime' => new \DateTime("@0"),
-                'extra' => array('file' => 'test', 'line' => 14),
-                'message' => 'log',
-            )
-        );
-    }
-
-    public function validateNotice($notice)
-    {
-        if (!isset($notice['errorClass']) || $notice['errorClass'] !== 'ERROR') {
-            return false;
-        }
-
-        if (!isset($notice['errorMessage']) || $notice['errorMessage'] !== 'log') {
-            return false;
-        }
-
-        if (!isset($notice['backtrace'])) {
-            return false;
-        }
-
-        $extraParams = array(
+        $record = array(
+            'level' => Logger::ERROR,
+            'level_name' => 'ERROR',
             'channel' => 'meh',
-            'context' => array()
+            'context' => array('foo' => 'bar'),
+            'datetime' => new \DateTime("@0"),
+            'extra' => array('beans' => 'yummy'),
+            'message' => 'log',
         );
+        
+        $this->handler->handle($record);
 
-        if (!isset($notice['extraParameters'])) {
-            return false;
-        }
+        $this->assertCount(1, $this->client->noticeHistory);
+        $this->assertInstanceOf('\Airbrake\Notice', $this->client->noticeHistory[0]);
 
-        return true;
+        $notice = $this->client->noticeHistory[0]->toArray();
+
+        $this->assertEquals($record['level_name'], $notice['errorClass']);
+        $this->assertEquals($record['message'], $notice['errorMessage']);
+        $this->assertEquals($record['context'], $notice['extraParameters']['context']);
+        $this->assertEquals($record['channel'], $notice['extraParameters']['channel']);
+        $this->assertEquals($record['extra'], $notice['extraParameters']['extra']);
+        $this->assertInternalType('array', $notice['backtrace']);
+        $this->assertGreaterThanOrEqual(1, count($notice['backtrace']));
     }
 }
