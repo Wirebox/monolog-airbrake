@@ -5,15 +5,15 @@ namespace Idio\Mocks;
 use Airbrake\Client;
 
 /**
- * 
+ *
  **/
 class AirbrakeClientMock extends Client
 {
     public $noticeHistory = [];
 
-    function __construct()
+    public function __construct()
     {
-        //do nothing
+        //overwrite parent constructor
     }
 
     public function notify($notice)

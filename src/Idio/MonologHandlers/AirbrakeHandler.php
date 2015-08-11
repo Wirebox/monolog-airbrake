@@ -30,7 +30,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
 
     /**
      * Constructor
-     * 
+     *
      * Stores the Airbrake API token before handing off to the parent constructor
      * to deal with levels and bubbling
      *
@@ -59,7 +59,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
                     'errorMessage' => $this->makeXmlSafe($record['message']),
                     'backtrace'    => debug_backtrace(),
                     'extraParameters' => array(
-                            'extra'   => $record['extra'], 
+                            'extra'   => $record['extra'],
                             'context' => $record['context'],
                             'channel' => $record['channel']
                     ),
@@ -81,7 +81,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
 
     /**
      * Initialize
-     * 
+     *
      * Create a Airbrake client object if it doesn't exist already
      */
     protected function initialize()
@@ -95,7 +95,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
 
     /**
      * Get Airbrake Client
-     * 
+     *
      * @return object Airbrake Client
      */
     protected function getAirbrakeClient()
@@ -107,7 +107,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
 
     /**
      * Set Airbrake Client
-     * 
+     *
      * @param \Airbrake\Client $client
      * @return void
      */
@@ -118,7 +118,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
 
     /**
      * Create Airbrake Notice
-     * 
+     *
      * @param array Airbrake notice details (errorClass, errorMessage, extraParameters)
      * @return object Airbrake Notice
      */

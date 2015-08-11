@@ -26,7 +26,7 @@ class AirbrakeHandlerTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Set Up
-     * 
+     *
      * Create a partially mocked handler so that we can 'expect' our calls to
      * Airbrake
      */
