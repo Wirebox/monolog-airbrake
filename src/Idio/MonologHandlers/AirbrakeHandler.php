@@ -57,7 +57,7 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
                 array(
                     'errorClass'   => $record['level_name'],
                     'errorMessage' => $this->makeXmlSafe($record['message']),
-                    'backtrace'    => debug_backtrace(),
+                    'backtrace'    => $this->getBacktraceExcludingLogger(),
                     'extraParameters' => array(
                             'extra'   => $record['extra'],
                             'context' => $record['context'],
@@ -77,6 +77,12 @@ class AirbrakeHandler extends \Monolog\Handler\AbstractProcessingHandler
     protected function makeXmlSafe($strMessage)
     {
         return str_replace('&', '&amp;', $strMessage);
+    }
+
+    protected function getBacktraceExcludingLogger()
+    {
+        $trace = debug_backtrace();
+        return array_slice($trace, 3);
     }
 
     /**
