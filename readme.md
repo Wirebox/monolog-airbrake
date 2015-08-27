@@ -1,4 +1,4 @@
-**:warning: PLEASE NOTE: This repository is no longer actively maintained or supported. Please see [Wirebox/monolog-airbrake](https://github.com/Wirebox/monolog-airbrake/) for a maintained fork.**
+**:warning: PLEASE NOTE: This repository is no longer actively maintained or supported. Please see [airbrake/phpbrake](https://github.com/airbrake/phpbrake) for a maintained airbrake monolog handler.**
 
 ---
 
